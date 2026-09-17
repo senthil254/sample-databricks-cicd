@@ -13,12 +13,19 @@ This project is a simple end-to-end CI/CD example for Databricks.
 
 ## How the flow works
 
-1. A developer pushes code to GitHub.
-2. GitHub Actions installs Python dependencies.
-3. Pytest runs the unit tests.
-4. Databricks CLI validates the bundle.
-5. On a push to `main`, the bundle is deployed to Databricks.
-6. The deployed job runs the demo notebook for validation.
+| Trigger | Target | Deploys | Runs the job |
+|---|---|---|---|
+| Pull request | dev | no | no |
+| Push to `main` | **dev** | yes | no |
+| Push tag `v*` | **prod** | yes | no |
+| Actions tab -> Run workflow | your choice | yes | only if you tick `run_job` |
+
+Deploying proves the job is installed correctly. Running it costs compute and
+touches data, so it is opt-in rather than automatic on every push.
+
+To release to prod:
+
+    git tag v1.0.0 && git push origin v1.0.0
 
 ## Required GitHub secrets
 

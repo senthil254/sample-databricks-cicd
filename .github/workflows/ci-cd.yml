@@ -1,52 +1,89 @@
 name: databricks-cicd-demo
 
 on:
-  # Allows running the pipeline by hand from the Actions tab, e.g. to retry
-  # after changing a secret without needing a throwaway commit.
+  # Manual button in the Actions tab. No approval gate - runs immediately.
   workflow_dispatch:
+    inputs:
+      target:
+        description: Bundle target to deploy
+        type: choice
+        options: [dev, prod]
+        default: dev
+      run_job:
+        description: Also run the job after deploying
+        type: boolean
+        default: false
   push:
     branches:
-      - main
-  pull_request:
+      - main          # -> deploys to dev
+    tags:
+      - 'v*'          # -> deploys to prod
+  pull_request:       # -> tests + validate only, never deploys
 
 jobs:
-  validate-and-deploy:
+  test:
+    name: Test and validate
     runs-on: ubuntu-latest
     env:
-      # OAuth machine-to-machine (service principal). Preferred over a personal
-      # access token: not tied to a human account, and scoped independently.
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
       DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
       PYTHONDONTWRITEBYTECODE: 1
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-
       - name: Install project dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
       - name: Run unit tests
         run: PYTEST_ADDOPTS='' PYTHONDONTWRITEBYTECODE=1 pytest -c pytest-ci.ini tests
-
-      - name: Set up Databricks CLI
-        # Pinned: tracking @main lets upstream changes break CI without a commit here.
-        uses: databricks/setup-cli@v1.17.0
-
+      - uses: databricks/setup-cli@v1.17.0
       - name: Validate bundle
         run: databricks bundle validate --target dev
 
-      - name: Deploy bundle to dev
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: databricks bundle deploy --target dev
+  deploy:
+    name: Deploy
+    needs: test
+    # Pull requests are validated by `test` but never deployed.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+      PYTHONDONTWRITEBYTECODE: 1
+    steps:
+      - uses: actions/checkout@v5
+      - uses: databricks/setup-cli@v1.17.0
 
-      - name: Run deployed job
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: databricks bundle run demo_validation_job --target dev
+      - name: Decide target
+        id: t
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "target=prod" >> "$GITHUB_OUTPUT"      # a version tag is a release
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "target=${{ inputs.target }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "target=dev" >> "$GITHUB_OUTPUT"       # ordinary push to main
+          fi
+
+      - name: Validate bundle (${{ steps.t.outputs.target }})
+        run: databricks bundle validate --target ${{ steps.t.outputs.target }}
+
+      - name: Deploy bundle (${{ steps.t.outputs.target }})
+        run: databricks bundle deploy --target ${{ steps.t.outputs.target }}
+
+      # Deploying proves the job is installed correctly. Actually running it
+      # costs compute and touches data, so it is opt-in rather than automatic
+      # on every push.
+      - name: Run job (opt-in)
+        if: github.event_name == 'workflow_dispatch' && inputs.run_job
+        run: databricks bundle run demo_validation_job --target ${{ steps.t.outputs.target }}
+
+      - name: Summary
+        run: |
+          echo "### Deployed to \`${{ steps.t.outputs.target }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Job run: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_job) && 'yes' || 'no (deploy only)' }}" >> "$GITHUB_STEP_SUMMARY"
