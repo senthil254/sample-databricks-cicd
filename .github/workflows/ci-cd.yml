@@ -10,15 +10,18 @@ jobs:
   validate-and-deploy:
     runs-on: ubuntu-latest
     env:
+      # OAuth machine-to-machine (service principal). Preferred over a personal
+      # access token: not tied to a human account, and scoped independently.
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
       PYTHONDONTWRITEBYTECODE: 1
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
@@ -31,7 +34,8 @@ jobs:
         run: PYTEST_ADDOPTS='' PYTHONDONTWRITEBYTECODE=1 pytest -c pytest-ci.ini tests
 
       - name: Set up Databricks CLI
-        uses: databricks/setup-cli@main
+        # Pinned: tracking @main lets upstream changes break CI without a commit here.
+        uses: databricks/setup-cli@v1.17.0
 
       - name: Validate bundle
         run: databricks bundle validate --target dev

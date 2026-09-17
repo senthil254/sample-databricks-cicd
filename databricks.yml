@@ -7,19 +7,21 @@ include:
 variables:
   notification_email:
     description: Email address for job failure notifications
-    default: selvarajaa13@gmail.com
+    default: johnvik@networth.awsapps.com
 
 workspace:
-  host: https://dbc-73857455-1589.cloud.databricks.com
+  host: https://dbc-f818cfa1-b8d3.cloud.databricks.com
 
 targets:
   dev:
     default: true
     mode: development
     workspace:
-      root_path: /Workspace/Users/selvarajaa13@gmail.com/.bundle/${bundle.name}/${bundle.target}
+      # current_user resolves for both a human and a service principal, so the
+      # same config deploys locally and from CI without editing paths.
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
 
   prod:
     mode: production
     workspace:
-      root_path: /Workspace/Users/selvarajaa13@gmail.com/.bundle/${bundle.name}/${bundle.target}
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}

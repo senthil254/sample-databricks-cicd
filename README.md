@@ -25,7 +25,8 @@ This project is a simple end-to-end CI/CD example for Databricks.
 Add these repository secrets before running the workflow:
 
 - `DATABRICKS_HOST`
-- `DATABRICKS_TOKEN`
+- `DATABRICKS_CLIENT_ID`
+- `DATABRICKS_CLIENT_SECRET`
 
 ## Local validation steps
 
