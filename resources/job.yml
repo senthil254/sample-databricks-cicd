@@ -1,0 +1,12 @@
+resources:
+  jobs:
+    demo_validation_job:
+      name: demo_validation_job_${bundle.target}
+      email_notifications:
+        on_failure:
+          - ${var.notification_email}
+      tasks:
+        - task_key: run_demo_notebook
+          notebook_task:
+            notebook_path: ../notebooks/demo_notebook.py
+            source: WORKSPACE

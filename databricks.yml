@@ -1,0 +1,25 @@
+bundle:
+  name: databricks-cicd-demo
+
+include:
+  - resources/*.yml
+
+variables:
+  notification_email:
+    description: Email address for job failure notifications
+    default: selvarajaa13@gmail.com
+
+workspace:
+  host: https://dbc-73857455-1589.cloud.databricks.com
+
+targets:
+  dev:
+    default: true
+    mode: development
+    workspace:
+      root_path: /Workspace/Users/selvarajaa13@gmail.com/.bundle/${bundle.name}/${bundle.target}
+
+  prod:
+    mode: production
+    workspace:
+      root_path: /Workspace/Users/selvarajaa13@gmail.com/.bundle/${bundle.name}/${bundle.target}
