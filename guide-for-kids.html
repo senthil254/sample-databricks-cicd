@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Robot Kitchen — A Guide for Kids</title>
+<style>
+:root{--bg:#f6f6f4;--panel:#fff;--ink:#1b1a18;--muted:#6a6862;--line:#e3e0da;
+--accent:#7a4bab;--soft:#f3ecfa;--code:#f2f0ec;--codeink:#1b1a18;
+--ok:#1f7a4d;--okbg:#eaf6ef;--warn:#8a4b1f;--warnbg:#fdf1e7;--out:#eef1f4;}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+--bg:#161513;--panel:#1f1e1b;--ink:#ecebe6;--muted:#a19d95;--line:#33302b;
+--accent:#c79ae8;--soft:#2a211a;--code:#25231f;--codeink:#ecebe6;
+--ok:#6cc79a;--okbg:#17281f;--warn:#e0a570;--warnbg:#2a1f16;--out:#22262b;}}
+:root[data-theme=dark]{--bg:#161513;--panel:#1f1e1b;--ink:#ecebe6;--muted:#a19d95;
+--line:#33302b;--accent:#c79ae8;--soft:#2a211a;--code:#25231f;--codeink:#ecebe6;
+--ok:#6cc79a;--okbg:#17281f;--warn:#e0a570;--warnbg:#2a1f16;--out:#22262b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:16px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:40px 20px 90px}
+header.top{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:10px}
+h1{font-size:28px;margin:0 0 6px;letter-spacing:-.02em;line-height:1.2}
+.sub{color:var(--muted);margin:0;font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:99px;
+padding:4px 11px;font-size:12px;color:var(--muted)}
+.chip b{color:var(--ink);font-weight:600}
+nav.toc{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);
+padding:10px 0;margin-bottom:26px;z-index:5;display:flex;gap:6px;overflow-x:auto}
+nav.toc a{font-size:12.5px;color:var(--muted);text-decoration:none;white-space:nowrap;
+padding:4px 10px;border-radius:99px;border:1px solid transparent}
+nav.toc a:hover{color:var(--accent);border-color:var(--line)}
+section{background:var(--panel);border:1px solid var(--line);border-radius:13px;
+padding:24px;margin-bottom:20px;scroll-margin-top:60px}
+.num{display:inline-block;background:var(--soft);color:var(--accent);font-size:11.5px;
+font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;
+border-radius:5px;margin-bottom:11px}
+h2{font-size:19.5px;margin:0 0 14px;letter-spacing:-.01em}
+h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+margin:22px 0 8px;font-weight:600}
+ul{margin:0;padding-left:19px}li{margin:5px 0}
+p{margin:0 0 10px}
+.cb{position:relative;margin:10px 0}
+.cb .lbl{display:flex;justify-content:space-between;align-items:center;
+background:var(--out);border:1px solid var(--line);border-bottom:none;
+border-radius:9px 9px 0 0;padding:5px 11px;font-size:11px;color:var(--muted);
+text-transform:uppercase;letter-spacing:.06em}
+.cb pre{margin:0;background:var(--code);color:var(--codeink);border:1px solid var(--line);
+border-radius:0 0 9px 9px;padding:13px;overflow-x:auto;
+font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}
+.cb.out pre{background:var(--out);color:var(--muted)}
+button.cp{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+border-radius:6px;padding:2px 9px;font-size:11px;cursor:pointer;font-family:inherit}
+button.cp:hover{color:var(--accent);border-color:var(--accent)}
+button.cp.done{color:var(--ok);border-color:var(--ok)}
+.note,.warn{border-radius:0 9px 9px 0;padding:12px 15px;margin:14px 0;border-left:3px solid}
+.note{background:var(--okbg);border-color:var(--ok)}
+.warn{background:var(--warnbg);border-color:var(--warn)}
+.note p,.warn p{margin:0}
+.scroll{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:420px}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+code.inl{background:var(--code);padding:1.5px 5px;border-radius:4px;
+font:12.5px ui-monospace,Menlo,monospace;word-break:break-word}
+svg.flow{width:100%;height:auto;display:block;margin:14px 0}
+details{border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin:9px 0;
+background:var(--bg)}
+summary{cursor:pointer;font-weight:600;font-size:14.5px}
+details[open] summary{margin-bottom:9px}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+padding-top:18px;margin-top:30px}
+.toggle{position:fixed;right:14px;bottom:14px;background:var(--panel);
+border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:7px 13px;
+font-size:12px;cursor:pointer;font-family:inherit;z-index:9}
+</style></head><body><div class="wrap">
+<header class="top"><h1>🤖 The Robot Kitchen</h1>
+<p class="sub">How we taught a robot to cook our recipes &mdash; without ever burning dinner.</p>
+<div class="chips"><span class="chip">For <b>curious 10-year-olds</b></span>
+<span class="chip">Story <b>+ real facts</b></span></div></header>
+<nav class="toc"><a href="#c1">1 Robot</a><a href="#c2">2 Recipe book</a><a href="#c3">3 Taste tester</a>
+<a href="#c4">4 Two kitchens</a><a href="#c5">5 Robot badge</a><a href="#c6">6 Oops!</a>
+<a href="#c7">7 Lessons</a><a href="#words">Word helper</a></nav><section id="c1"><span class="num">Chapter 1</span><h2>🤖 Meet the robot</h2>
+<p>Imagine a robot chef in a kitchen far away.</p>
+<ul><li>It is <b>brilliant</b> at cooking</li>
+<li>It follows recipes <b>perfectly</b></li>
+<li>It never gets tired 😴</li></ul>
+<p>But there is one catch.</p>
+<div class="note"><p>🤔 <b>The robot cannot read your handwriting.</b>
+Your recipe is at your house. The robot is somewhere else. Someone has to carry it over.</p></div>
+<p>Carrying recipes by hand goes wrong a lot:</p>
+<ul><li>You grab yesterday&rsquo;s recipe by mistake 📄</li>
+<li>You drop page two on the way 💨</li>
+<li>Nobody remembers which one the robot has 🤷</li></ul></section><section id="c2"><span class="num">Chapter 2</span><h2>📚 The magic recipe book</h2>
+<p>So we got a magic book called <b>GitHub</b>.</p>
+<ul><li>Every recipe lives inside it</li>
+<li>It remembers <b>every single change</b> ever made</li>
+<li>You can always flip back to yesterday&rsquo;s version ⏪</li></ul>
+<p>Then we built a <b>delivery van</b> that drives recipes to the robot, all by itself. 🚚</p><svg class="flow" viewBox="0 0 860 170" xmlns="http://www.w3.org/2000/svg" role="img"
+ aria-label="You write a recipe, the taste-tester checks it, the delivery van carries it, the robot kitchen is ready to cook">
+<defs><marker id="k" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+<polygon points="0 0, 9 3.5, 0 7" fill="currentColor"/></marker></defs>
+<g fill="none" stroke="currentColor" stroke-width="1.5" opacity=".45" marker-end="url(#k)">
+<line x1="152" y1="70" x2="198" y2="70"/><line x1="348" y1="70" x2="394" y2="70"/>
+<line x1="544" y1="70" x2="590" y2="70"/></g>
+<g font-size="13" font-family="ui-sans-serif,system-ui" text-anchor="middle">
+<rect x="8" y="38" width="144" height="64" rx="11" fill="var(--soft)" stroke="var(--accent)" stroke-width="1.3"/>
+<text x="80" y="60" font-size="23">📝</text><text x="80" y="84" fill="var(--accent)" font-weight="600">Your recipe</text>
+<rect x="198" y="38" width="150" height="64" rx="11" fill="var(--panel)" stroke="var(--line)"/>
+<text x="273" y="60" font-size="23">👅</text><text x="273" y="84" fill="var(--ink)" font-weight="600">Taste tester</text>
+<rect x="394" y="38" width="150" height="64" rx="11" fill="var(--panel)" stroke="var(--line)"/>
+<text x="469" y="60" font-size="23">🚚</text><text x="469" y="84" fill="var(--ink)" font-weight="600">Delivery van</text>
+<rect x="590" y="38" width="150" height="64" rx="11" fill="var(--panel)" stroke="var(--line)"/>
+<text x="665" y="60" font-size="23">🤖</text><text x="665" y="84" fill="var(--ink)" font-weight="600">Robot kitchen</text>
+<text x="430" y="138" fill="var(--muted)" font-size="12">The robot only cooks when we say so 🍳</text>
+</g></svg>
+<p>Grown-ups call the van a <b>pipeline</b>. Fancy word. It just means:
+<i>a line of steps that happen in order, automatically.</i></p></section><section id="c3"><span class="num">Chapter 3</span><h2>👅 The taste tester</h2>
+<p>Here is the clever bit! Before the van leaves, a <b>taste tester</b> checks the recipe.</p>
+<ul><li>Does 2 + 3 really make 5? ✅</li>
+<li>Is anything missing? 🔍</li></ul>
+<p>Our taste tester checks two things every time:</p><div class="cb out"><div class="lbl"><span>what the tester says</span></div><pre>test_add_numbers        PASSED  ✅
+test_normalize_name     PASSED  ✅
+
+2 passed in 0.01s</pre></div>
+<div class="warn"><p>🛑 <b>If even ONE check fails, the van does not move.</b>
+No bad recipe ever reaches the robot. Not once.</p></div>
+<p>The whole check takes about <b>eight seconds</b>. ⏱️</p></section><section id="c4"><span class="num">Chapter 4</span><h2>🏠 Two kitchens, not one</h2>
+<p>The robot has <b>two</b> kitchens. This turns out to matter a lot.</p>
+<div class="scroll"><table>
+<tr><th>Kitchen</th><th>What happens there</th><th>Who eats it</th></tr>
+<tr><td>🧪 <b>Practice</b></td><td>Try wild ideas. Make a mess!</td><td>Just you</td></tr>
+<tr><td>🍽️ <b>Real</b></td><td>Only recipes that truly work</td><td><b>Everybody</b></td></tr>
+</table></div>
+<p>Practice kitchen: every save goes there. Mess away. 🎨</p>
+<p>Real kitchen: you must put a <b>sticker</b> on the recipe first. 🏷️</p><div class="cb"><div class="lbl"><span>the sticker</span></div><pre>v0.1.0</pre></div>
+<div class="note"><p>💡 <b>Why a sticker?</b> So nobody <i>accidentally</i> sends dinner to
+everyone. Sticking a label on is something you have to <b>mean</b> to do.</p></div></section><section id="c5"><span class="num">Chapter 5</span><h2>🪪 The robot&rsquo;s own badge</h2>
+<p>The van needs a badge to get into the kitchen. But whose badge?</p>
+<p>At first we used <b>John&rsquo;s</b> badge. Then we thought harder. 🤔</p>
+<ul><li>What if John goes on holiday? 🏖️</li>
+<li>What if John changes his password?</li>
+<li>What if John leaves?</li></ul>
+<p>Dinner stops. For everyone. 😱</p>
+<div class="note"><p>✅ <b>So we made a badge for the VAN itself.</b> The van is not a person.
+It never goes on holiday, never forgets its password, never leaves.</p></div>
+<p>Grown-ups call this a <b>service principal</b>. It just means <i>a robot&rsquo;s own badge.</i></p></section><section id="c6"><span class="num">Chapter 6</span><h2>😅 Oops! Three mistakes</h2>
+<p>It did not work first time. It almost never does! Here is what went wrong.</p>
+
+<h3>🕳️ Oops 1: The invisible password</h3>
+<ul><li>A helper robot wrote the password down</li>
+<li>But it wrote&hellip; <b>nothing</b>. An empty page!</li>
+<li>The list said &ldquo;password: ✓&rdquo; &mdash; so it <i>looked</i> fine</li></ul>
+<p>It only broke when the van actually tried the door. 🚪</p>
+<div class="note"><p>💡 A password on a list is not the same as a password that <b>works</b>.
+You have to try the door.</p></div>
+
+<h3>👻 Oops 2: The invisible extra character</h3>
+<ul><li>Next try, the password was written correctly&hellip;</li>
+<li>&hellip;with one invisible <b>extra Enter</b> at the end ⏎</li>
+<li>Like writing your name then a secret blank line</li></ul>
+<p>The door said no. And the error message <b>lied</b> &mdash; it said &ldquo;no password given&rdquo;,
+when really the password was there and just slightly wrong. 😤</p>
+
+<h3>🏚️ Oops 3: The right key, the wrong house</h3>
+<ul><li>Someone made a badge &mdash; for the <b>wrong kitchen</b></li>
+<li>A perfectly good key&hellip; to somebody else&rsquo;s door</li></ul>
+<div class="warn"><p>🔍 <b>Always check which house you are standing in</b> before
+trusting the key in your hand.</p></div></section><section id="c7"><span class="num">Chapter 7</span><h2>🌟 The big lessons</h2>
+<div class="scroll"><table>
+<tr><th></th><th>Lesson</th><th>Why it matters</th></tr>
+<tr><td>1️⃣</td><td><b>Check before you send</b></td><td>The taste tester catches mistakes while they are still cheap</td></tr>
+<tr><td>2️⃣</td><td><b>Practice away from the real thing</b></td><td>Mess up safely, where nobody else notices</td></tr>
+<tr><td>3️⃣</td><td><b>Looks right ≠ is right</b></td><td>The empty password looked perfect on the list</td></tr>
+<tr><td>4️⃣</td><td><b>Error messages can be wrong</b></td><td>Ours blamed the wrong thing entirely</td></tr>
+<tr><td>5️⃣</td><td><b>Robots need their own badge</b></td><td>So nothing breaks when a person is away</td></tr>
+</table></div>
+<div class="note"><p>🍳 <b>One more!</b> Sending the recipe over is <b>free</b>.
+Actually cooking costs money &mdash; the ovens use power. So we deliver often,
+and cook only when we really want dinner.</p></div>
+<h3>🤔 Think about it</h3>
+<ul><li>Why does the taste tester check <b>before</b> the van leaves, not after?</li>
+<li>Why give the van its own badge instead of borrowing John&rsquo;s?</li>
+<li>The password list said ✓ but the password was empty. How would <b>you</b> catch that?</li>
+<li>Why should &ldquo;send dinner to everyone&rdquo; be harder than &ldquo;try something in practice&rdquo;?</li></ul></section><section id="words"><span class="num">Helper</span><h2>📖 Word helper</h2>
+<div class="scroll"><table>
+<tr><th>Grown-up word</th><th>What it really means</th></tr>
+<tr><td>GitHub</td><td>The magic recipe book 📚</td></tr>
+<tr><td>Repository</td><td>One shelf in that book</td></tr>
+<tr><td>Commit</td><td>Saving a change, with a note saying why</td></tr>
+<tr><td>Push</td><td>Putting your recipe into the shared book</td></tr>
+<tr><td>Tag</td><td>The sticker 🏷️ that means &ldquo;this one is ready!&rdquo;</td></tr>
+<tr><td>Pipeline / CI/CD</td><td>The delivery van 🚚</td></tr>
+<tr><td>Tests</td><td>The taste tester 👅</td></tr>
+<tr><td>Deploy</td><td>Dropping the recipe at the kitchen</td></tr>
+<tr><td>Job</td><td>The cooking itself 🍳</td></tr>
+<tr><td>dev</td><td>The practice kitchen 🧪</td></tr>
+<tr><td>prod</td><td>The real kitchen 🍽️</td></tr>
+<tr><td>Secret</td><td>A password kept in a safe 🔐</td></tr>
+<tr><td>Service principal</td><td>The van&rsquo;s own badge 🪪</td></tr>
+<tr><td>Serverless</td><td>Ovens that appear when needed, then vanish ✨</td></tr>
+</table></div></section>
+<footer>🌟 Every single thing in this story really happened &mdash; including all three mistakes.</footer>
+</div>
+<button class="toggle" onclick="tg()">◐ theme</button>
+<script>
+document.querySelectorAll('.cb').forEach(function(b){
+  var pre=b.querySelector('pre'), lbl=b.querySelector('.lbl');
+  if(!pre||!lbl||b.classList.contains('out'))return;
+  var btn=document.createElement('button');btn.className='cp';btn.textContent='copy';
+  btn.onclick=function(){
+    navigator.clipboard.writeText(pre.innerText).then(function(){
+      btn.textContent='copied';btn.classList.add('done');
+      setTimeout(function(){btn.textContent='copy';btn.classList.remove('done')},1400);
+    }).catch(function(){btn.textContent='press Cmd+C'});
+  };
+  lbl.appendChild(btn);
+});
+function tg(){var r=document.documentElement;
+  var d=r.getAttribute('data-theme')==='dark'||
+    (!r.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme:dark)').matches);
+  r.setAttribute('data-theme',d?'light':'dark');}
+</script></body></html>

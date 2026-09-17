@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Databricks × GitHub CI/CD — Technical Guide</title>
+<style>
+:root{--bg:#f6f6f4;--panel:#fff;--ink:#1b1a18;--muted:#6a6862;--line:#e3e0da;
+--accent:#b24a2a;--soft:#fcefe9;--code:#f2f0ec;--codeink:#1b1a18;
+--ok:#1f7a4d;--okbg:#eaf6ef;--warn:#8a4b1f;--warnbg:#fdf1e7;--out:#eef1f4;}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+--bg:#161513;--panel:#1f1e1b;--ink:#ecebe6;--muted:#a19d95;--line:#33302b;
+--accent:#e8794a;--soft:#2a211a;--code:#25231f;--codeink:#ecebe6;
+--ok:#6cc79a;--okbg:#17281f;--warn:#e0a570;--warnbg:#2a1f16;--out:#22262b;}}
+:root[data-theme=dark]{--bg:#161513;--panel:#1f1e1b;--ink:#ecebe6;--muted:#a19d95;
+--line:#33302b;--accent:#e8794a;--soft:#2a211a;--code:#25231f;--codeink:#ecebe6;
+--ok:#6cc79a;--okbg:#17281f;--warn:#e0a570;--warnbg:#2a1f16;--out:#22262b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:16px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:40px 20px 90px}
+header.top{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:10px}
+h1{font-size:28px;margin:0 0 6px;letter-spacing:-.02em;line-height:1.2}
+.sub{color:var(--muted);margin:0;font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:99px;
+padding:4px 11px;font-size:12px;color:var(--muted)}
+.chip b{color:var(--ink);font-weight:600}
+nav.toc{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);
+padding:10px 0;margin-bottom:26px;z-index:5;display:flex;gap:6px;overflow-x:auto}
+nav.toc a{font-size:12.5px;color:var(--muted);text-decoration:none;white-space:nowrap;
+padding:4px 10px;border-radius:99px;border:1px solid transparent}
+nav.toc a:hover{color:var(--accent);border-color:var(--line)}
+section{background:var(--panel);border:1px solid var(--line);border-radius:13px;
+padding:24px;margin-bottom:20px;scroll-margin-top:60px}
+.num{display:inline-block;background:var(--soft);color:var(--accent);font-size:11.5px;
+font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;
+border-radius:5px;margin-bottom:11px}
+h2{font-size:19.5px;margin:0 0 14px;letter-spacing:-.01em}
+h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+margin:22px 0 8px;font-weight:600}
+ul{margin:0;padding-left:19px}li{margin:5px 0}
+p{margin:0 0 10px}
+.cb{position:relative;margin:10px 0}
+.cb .lbl{display:flex;justify-content:space-between;align-items:center;
+background:var(--out);border:1px solid var(--line);border-bottom:none;
+border-radius:9px 9px 0 0;padding:5px 11px;font-size:11px;color:var(--muted);
+text-transform:uppercase;letter-spacing:.06em}
+.cb pre{margin:0;background:var(--code);color:var(--codeink);border:1px solid var(--line);
+border-radius:0 0 9px 9px;padding:13px;overflow-x:auto;
+font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}
+.cb.out pre{background:var(--out);color:var(--muted)}
+button.cp{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+border-radius:6px;padding:2px 9px;font-size:11px;cursor:pointer;font-family:inherit}
+button.cp:hover{color:var(--accent);border-color:var(--accent)}
+button.cp.done{color:var(--ok);border-color:var(--ok)}
+.note,.warn{border-radius:0 9px 9px 0;padding:12px 15px;margin:14px 0;border-left:3px solid}
+.note{background:var(--okbg);border-color:var(--ok)}
+.warn{background:var(--warnbg);border-color:var(--warn)}
+.note p,.warn p{margin:0}
+.scroll{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:420px}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+code.inl{background:var(--code);padding:1.5px 5px;border-radius:4px;
+font:12.5px ui-monospace,Menlo,monospace;word-break:break-word}
+svg.flow{width:100%;height:auto;display:block;margin:14px 0}
+details{border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin:9px 0;
+background:var(--bg)}
+summary{cursor:pointer;font-weight:600;font-size:14.5px}
+details[open] summary{margin-bottom:9px}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+padding-top:18px;margin-top:30px}
+.toggle{position:fixed;right:14px;bottom:14px;background:var(--panel);
+border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:7px 13px;
+font-size:12px;cursor:pointer;font-family:inherit;z-index:9}
+</style></head><body><div class="wrap">
+<header class="top"><h1>Databricks &times; GitHub CI/CD &mdash; Technical Guide</h1>
+<p class="sub">Set up Asset Bundles deployed by GitHub Actions. Every command here was run for real.</p>
+<div class="chips"><span class="chip">Account <b>f19dd938&hellip;3010e</b></span>
+<span class="chip">Workspace <b>dbc-f818cfa1-b8d3</b></span>
+<span class="chip">Region <b>us-west-2</b></span>
+<span class="chip">Compute <b>Serverless</b></span>
+<span class="chip">Auth <b>OAuth M2M</b></span></div></header>
+<nav class="toc"><a href="#what">What</a><a href="#pre">Prerequisites</a><a href="#s1">1 Workspace</a>
+<a href="#s2">2 Service principal</a><a href="#s3">3 Profiles</a><a href="#s4">4 Bundle</a>
+<a href="#s5">5 Push</a><a href="#s6">6 Secrets</a><a href="#s7">7 Workflow</a>
+<a href="#s8">8 Verify</a><a href="#trouble">Troubleshooting</a></nav><section id="what"><span class="num">Overview</span><h2>What we are building</h2><svg class="flow" viewBox="0 0 860 150" xmlns="http://www.w3.org/2000/svg" role="img"
+ aria-label="Flow: developer pushes to GitHub, Actions runs tests, validates and deploys the bundle, Databricks runs the job">
+<defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+<polygon points="0 0, 9 3.5, 0 7" fill="currentColor"/></marker></defs>
+<g fill="none" stroke="currentColor" stroke-width="1.4" opacity=".45" marker-end="url(#a)">
+<line x1="150" y1="62" x2="196" y2="62"/><line x1="346" y1="62" x2="392" y2="62"/>
+<line x1="542" y1="62" x2="588" y2="62"/></g>
+<g font-size="13" font-family="ui-sans-serif,system-ui" text-anchor="middle">
+<rect x="8" y="34" width="142" height="56" rx="9" fill="var(--soft)" stroke="var(--accent)" stroke-width="1.2"/>
+<text x="79" y="58" fill="var(--accent)" font-weight="600">1. You</text>
+<text x="79" y="76" fill="var(--muted)" font-size="11.5">git push</text>
+<rect x="196" y="34" width="150" height="56" rx="9" fill="var(--panel)" stroke="var(--line)"/>
+<text x="271" y="58" fill="var(--ink)" font-weight="600">2. GitHub Actions</text>
+<text x="271" y="76" fill="var(--muted)" font-size="11.5">runs the tests</text>
+<rect x="392" y="34" width="150" height="56" rx="9" fill="var(--panel)" stroke="var(--line)"/>
+<text x="467" y="58" fill="var(--ink)" font-weight="600">3. Bundle deploy</text>
+<text x="467" y="76" fill="var(--muted)" font-size="11.5">sends the job over</text>
+<rect x="588" y="34" width="150" height="56" rx="9" fill="var(--panel)" stroke="var(--line)"/>
+<text x="663" y="58" fill="var(--ink)" font-weight="600">4. Databricks</text>
+<text x="663" y="76" fill="var(--muted)" font-size="11.5">job is ready</text>
+<text x="430" y="122" fill="var(--muted)" font-size="11.5">Running the job is a separate, opt-in step</text>
+</g></svg>
+<h3>The pieces</h3>
+<div class="scroll"><table>
+<tr><th>File</th><th>Job</th></tr>
+<tr><td><code class="inl">databricks.yml</code></td><td>Bundle config &mdash; host, targets</td></tr>
+<tr><td><code class="inl">resources/job.yml</code></td><td>The Databricks job</td></tr>
+<tr><td><code class="inl">.github/workflows/ci-cd.yml</code></td><td>The pipeline</td></tr>
+<tr><td><code class="inl">src/</code> + <code class="inl">tests/</code></td><td>Python code and unit tests</td></tr>
+</table></div>
+<div class="note"><p><b>Not Git folders.</b> Two ways exist to join GitHub and Databricks.
+<b>Git folders</b> clone the repo <i>into</i> the workspace &mdash; you edit notebooks there.
+<b>Asset Bundles</b> (this guide) make GitHub the source of truth and push deployments <i>in</i>.
+Nothing is cloned into the workspace here.</p></div></section><section id="pre"><span class="num">Before you start</span><h2>Prerequisites</h2><ul><li>A Databricks workspace you can log into</li><li>Databricks CLI <b>v0.221+</b></li><li>GitHub CLI (<code class="inl">gh</code>), logged in</li><li>Python 3.11+</li></ul><div class="cb"><div class="lbl"><span>cli · check versions</span></div><pre>databricks --version
+gh auth status</pre></div></section><section id="s1"><span class="num">Step 1</span><h2>Find your workspace URL</h2><ul><li>Open the account console</li><li>Go to <b>Workspaces</b></li><li>The URL column is what you need</li></ul><div class="cb"><div class="lbl"><span>value</span></div><pre>https://dbc-f818cfa1-b8d3.cloud.databricks.com</pre></div><h3>Or read it from the API</h3><div class="cb"><div class="lbl"><span>cli · in</span></div><pre>databricks account workspaces list -o json</pre></div><div class="warn"><p><b>Check the account.</b> One workspace URL belongs to exactly one Databricks account. During this build a service principal was created in the wrong workspace &mdash; its credentials simply cannot authenticate to another account. Always confirm the host in the browser address bar.</p></div></section><section id="s2"><span class="num">Step 2</span><h2>Create a service principal</h2><p>This is the identity CI uses. It is not a person.</p><ul><li>Workspace <b>Settings</b></li><li><b>Identity and access</b> &rarr; <b>Service principals</b></li><li>Add one, then <b>Generate secret</b></li></ul><p>You get two values:</p><ul><li><b>Client ID</b> &mdash; an identifier, not sensitive</li><li><b>Secret</b> &mdash; sensitive, shown <b>once</b></li></ul><div class="warn"><p><b>Copy the secret immediately.</b> It is never shown again. If you lose it, generate a new one.</p></div><h3>Check it works</h3><div class="cb"><div class="lbl"><span>cli · in</span></div><pre>export DATABRICKS_HOST=&quot;https://dbc-f818cfa1-b8d3.cloud.databricks.com&quot;
+export DATABRICKS_CLIENT_ID=&quot;&lt;your client id&gt;&quot;
+export DATABRICKS_CLIENT_SECRET=&quot;&lt;your secret&gt;&quot;
+databricks current-user me</pre></div><div class="cb out"><div class="lbl"><span>cli · out</span></div><pre>{
+  &quot;displayName&quot;: &quot;john-principal&quot;,
+  &quot;id&quot;: &quot;77774359234039&quot;
+}</pre></div></section><section id="s3"><span class="num">Step 3</span><h2>Create local CLI profiles</h2><p>Profiles live in <code class="inl">~/.databrickscfg</code>.</p><div class="cb"><div class="lbl"><span>file · ~/.databrickscfg</span></div><pre>[john-sp]
+host          = https://dbc-f818cfa1-b8d3.cloud.databricks.com
+client_id     = 93bf11e8-964d-4b9b-8989-f14234f2b6f9
+client_secret = &lt;your secret&gt;
+
+[john-pat]
+host  = https://dbc-f818cfa1-b8d3.cloud.databricks.com
+token = &lt;your personal access token&gt;</pre></div><div class="cb"><div class="lbl"><span>cli · in</span></div><pre>databricks current-user me --profile john-sp</pre></div><h3>PAT or service principal?</h3><div class="scroll"><table><tr><th></th><th>PAT</th><th>OAuth M2M</th></tr><tr><td>Workspace API</td><td>yes</td><td>yes</td></tr><tr><td><b>Account API</b></td><td><b>no &mdash; HTTP 401</b></td><td><b>yes</b></td></tr><tr><td>Scope</td><td>one workspace</td><td>whole account</td></tr><tr><td>Needs a browser</td><td>no</td><td>no</td></tr><tr><td>Tied to a person</td><td>yes</td><td>no</td></tr></table></div><div class="note"><p><b>Both were measured, not assumed.</b> A PAT against the account API returns <code class="inl">401 &mdash; Credential was not sent or was of an unsupported type</code>. Expiry was near-identical (729 vs 730 days), so rotation effort is not a deciding factor. Use M2M for CI; a PAT is fine for a single-workspace demo.</p></div></section><section id="s4"><span class="num">Step 4</span><h2>Configure the bundle</h2><div class="cb"><div class="lbl"><span>file · databricks.yml</span></div><pre>bundle:
+  name: databricks-cicd-demo
+
+include:
+  - resources/*.yml
+
+workspace:
+  host: https://dbc-f818cfa1-b8d3.cloud.databricks.com
+
+targets:
+  dev:
+    default: true
+    mode: development
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+
+  prod:
+    mode: production
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}</pre></div><div class="note"><p><b>Why <code class="inl">${workspace.current_user.userName}</code>?</b> It resolves to whoever deploys &mdash; you locally, the service principal in CI. A hardcoded email breaks the moment CI runs as a different identity.</p></div><h3>Validate and deploy</h3><div class="cb"><div class="lbl"><span>cli · in</span></div><pre>databricks bundle validate --target dev --profile john-sp
+databricks bundle deploy   --target dev --profile john-sp</pre></div><div class="cb out"><div class="lbl"><span>cli · out</span></div><pre>Name: databricks-cicd-demo
+Target: dev
+Workspace:
+  Host: https://dbc-f818cfa1-b8d3.cloud.databricks.com
+  User: 93bf11e8-964d-4b9b-8989-f14234f2b6f9
+
+Validation OK!
+Deployment complete!</pre></div><div class="note"><p><b>Serverless needs no special config.</b> This workspace is serverless-only. A notebook task picks up serverless automatically &mdash; <code class="inl">resources/job.yml</code> needed no change at all.</p></div></section><section id="s5"><span class="num">Step 5</span><h2>Push the code</h2><div class="cb"><div class="lbl"><span>cli · in</span></div><pre>cd your-project
+git init -b main
+git add -A
+git commit -m &quot;Initial commit: Databricks Asset Bundle CI/CD demo&quot;
+git remote add origin git@github.com:OWNER/REPO.git
+git push -u origin main</pre></div><div class="warn"><p><b>Scan for secrets first.</b> Credentials must come from GitHub secrets, never from files in the repo.</p></div><div class="cb"><div class="lbl"><span>cli · in</span></div><pre>grep -rniE &#x27;dapi[0-9a-f]{20,}|AKIA[0-9A-Z]{16}|password|token\s*=&#x27; . --exclude-dir=.git</pre></div></section><section id="s6"><span class="num">Step 6</span><h2>Set the GitHub secrets</h2><p>Three are needed:</p><ul><li><code class="inl">DATABRICKS_HOST</code></li><li><code class="inl">DATABRICKS_CLIENT_ID</code></li><li><code class="inl">DATABRICKS_CLIENT_SECRET</code></li></ul><div class="cb"><div class="lbl"><span>cli · in</span></div><pre>gh secret set DATABRICKS_HOST -R OWNER/REPO --body &quot;https://dbc-f818cfa1-b8d3.cloud.databricks.com&quot;
+gh secret set DATABRICKS_CLIENT_ID -R OWNER/REPO --body &quot;93bf11e8-964d-4b9b-8989-f14234f2b6f9&quot;
+printf &#x27;%s&#x27; &#x27;YOUR_SECRET&#x27; | gh secret set DATABRICKS_CLIENT_SECRET -R OWNER/REPO</pre></div><div class="warn"><p><b>Use <code class="inl">printf</code>, not <code class="inl">echo</code>.</b> <code class="inl">echo</code> appends a newline, and a newline inside the secret is enough to break authentication. This cost two failed runs during this build.</p></div><div class="cb"><div class="lbl"><span>cli · in</span></div><pre>gh secret list -R OWNER/REPO</pre></div><div class="warn"><p><b>A listed secret is not a working secret.</b> <code class="inl">gh secret list</code> only proves the <i>name</i> exists. An empty or malformed value looks identical here. Only a pipeline run proves the value.</p></div></section><section id="s7"><span class="num">Step 7</span><h2>The workflow</h2><h3>What triggers what</h3><div class="scroll"><table><tr><th>Trigger</th><th>Target</th><th>Deploys</th><th>Runs job</th></tr><tr><td>Pull request</td><td>dev</td><td>no &mdash; validate only</td><td>no</td></tr><tr><td>Push to <code class="inl">main</code></td><td><b>dev</b></td><td>yes</td><td>no</td></tr><tr><td>Push tag <code class="inl">v*</code></td><td><b>prod</b></td><td>yes</td><td>no</td></tr><tr><td>Actions button</td><td>your choice</td><td>yes</td><td>only if ticked</td></tr></table></div><div class="cb"><div class="lbl"><span>file · .github/workflows/ci-cd.yml (triggers)</span></div><pre>on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Bundle target to deploy
+        type: choice
+        options: [dev, prod]
+        default: dev
+      run_job:
+        description: Also run the job after deploying
+        type: boolean
+        default: false
+  push:
+    branches: [main]     # -&gt; dev
+    tags: [&#x27;v*&#x27;]         # -&gt; prod
+  pull_request:          # -&gt; tests only</pre></div><div class="cb"><div class="lbl"><span>file · ci-cd.yml (target choice)</span></div><pre>- name: Decide target
+  id: t
+  run: |
+    if [[ &quot;${GITHUB_REF}&quot; == refs/tags/v* ]]; then
+      echo &quot;target=prod&quot; &gt;&gt; &quot;$GITHUB_OUTPUT&quot;
+    elif [[ &quot;${{ github.event_name }}&quot; == &quot;workflow_dispatch&quot; ]]; then
+      echo &quot;target=${{ inputs.target }}&quot; &gt;&gt; &quot;$GITHUB_OUTPUT&quot;
+    else
+      echo &quot;target=dev&quot; &gt;&gt; &quot;$GITHUB_OUTPUT&quot;
+    fi</pre></div><div class="note"><p><b>Why the job does not run on every push.</b> One commit here only added a workflow trigger &mdash; no notebook, no logic change &mdash; yet it executed a real job on paid compute. Deploying proves the job is installed correctly; running it costs money and touches data. So running is opt-in.</p></div><h3>Pin your actions</h3><div class="cb"><div class="lbl"><span>file · ci-cd.yml</span></div><pre>uses: actions/checkout@v5
+uses: actions/setup-python@v6
+uses: databricks/setup-cli@v1.17.0</pre></div><p>Tracking <code class="inl">@main</code> lets an upstream change break CI with no commit of your own.</p></section><section id="s8"><span class="num">Step 8</span><h2>Verify</h2><div class="cb"><div class="lbl"><span>cli · in</span></div><pre>gh run list -R OWNER/REPO --limit 3
+gh run view &lt;RUN_ID&gt; -R OWNER/REPO</pre></div><div class="cb out"><div class="lbl"><span>cli · out</span></div><pre>✓ Test and validate in 11s
+✓ Deploy in 31s
+  ✓ Validate bundle (prod)
+  ✓ Deploy bundle (prod)
+  ⊘ Run job (opt-in)        skipped</pre></div><h3>Confirm on the Databricks side</h3><div class="cb"><div class="lbl"><span>cli · in</span></div><pre>databricks jobs list --profile john-sp -o json</pre></div><div class="cb out"><div class="lbl"><span>cli · out</span></div><pre>860445871023042   demo_validation_job_prod
+1011918271712811  [dev john_principal] demo_validation_job_dev</pre></div><div class="note"><p><b>The <code class="inl">[dev &lt;user&gt;]</code> prefix is automatic.</b> DABs <code class="inl">mode: development</code> isolates each developer&rsquo;s copy. Prod keeps the clean name. Seeing both is proof the two targets really differ.</p></div><h3>Release to prod</h3><div class="cb"><div class="lbl"><span>cli · in</span></div><pre>git tag v0.1.0
+git push origin v0.1.0</pre></div></section><section id="trouble"><span class="num">Reference</span><h2>Troubleshooting</h2>
+<details><summary>"cannot configure default credentials"</summary>
+<p><b>This message is misleading.</b> It sounds like nothing was supplied &mdash; but the
+credentials are present and <i>wrong</i>.</p>
+<div class="cb out"><div class="lbl"><span>cli · out</span></div><pre>Error: failed during request visitor: default auth: cannot configure
+default credentials ... Config: host=***, client_id=***, client_secret=***</pre></div>
+<p>The SDK tries the OAuth exchange, the server rejects it, and the whole chain is reported as
+unconfigurable. The real <code class="inl">invalid_client</code> answer never surfaces.</p>
+<p><b>Usual cause:</b> a trailing newline in the secret. Re-set it with
+<code class="inl">printf</code>.</p></details>
+
+<details><summary>Secret exists but CI still fails</summary>
+<p>Check the run log. GitHub masks real values as <code class="inl">***</code>; an empty value
+shows as nothing at all:</p>
+<div class="cb out"><div class="lbl"><span>cli · out</span></div><pre>DATABRICKS_HOST: ***
+DATABRICKS_CLIENT_ID: ***
+DATABRICKS_CLIENT_SECRET:          &lt;- empty</pre></div>
+<p>The CLI also lists what it found: <code class="inl">Env: DATABRICKS_HOST,
+DATABRICKS_CLIENT_ID</code> &mdash; two, not three.</p></details>
+
+<details><summary>"refresh token is invalid"</summary>
+<p>That profile uses OAuth <b>U2M</b> (user-to-machine), which needs a browser login that has
+expired. It is <b>not</b> M2M. Re-authenticate:</p>
+<div class="cb"><div class="lbl"><span>cli · in</span></div><pre>databricks auth login --host &lt;workspace-url&gt; --profile &lt;name&gt;</pre></div>
+</details>
+
+<details><summary>"src refspec v0.1.0 does not match any"</summary>
+<p>The tag does not exist locally. Create it, then push &mdash; as two steps.</p>
+<div class="cb"><div class="lbl"><span>cli · in</span></div><pre>git tag v0.1.0
+git push origin v0.1.0</pre></div></details>
+
+<details><summary>Bundle deploys but the job will not run</summary>
+<p>Check the workspace compute mode. A serverless-only workspace cannot start classic job
+clusters &mdash; but a plain notebook task needs no compute block at all.</p></details>
+</section>
+
+<footer>Every command and output here was executed against a live workspace.
+No screenshots are included for this guide &mdash; the whole flow is command-line.</footer>
+</div>
+<button class="toggle" onclick="tg()">◐ theme</button>
+<script>
+document.querySelectorAll('.cb').forEach(function(b){
+  var pre=b.querySelector('pre'), lbl=b.querySelector('.lbl');
+  if(!pre||!lbl||b.classList.contains('out'))return;
+  var btn=document.createElement('button');btn.className='cp';btn.textContent='copy';
+  btn.onclick=function(){
+    navigator.clipboard.writeText(pre.innerText).then(function(){
+      btn.textContent='copied';btn.classList.add('done');
+      setTimeout(function(){btn.textContent='copy';btn.classList.remove('done')},1400);
+    }).catch(function(){btn.textContent='press Cmd+C'});
+  };
+  lbl.appendChild(btn);
+});
+function tg(){var r=document.documentElement;
+  var d=r.getAttribute('data-theme')==='dark'||
+    (!r.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme:dark)').matches);
+  r.setAttribute('data-theme',d?'light':'dark');}
+</script></body></html>

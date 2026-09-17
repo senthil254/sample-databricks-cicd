@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Databricks × GitHub — Plain English Guide</title>
+<style>
+:root{--bg:#f6f6f4;--panel:#fff;--ink:#1b1a18;--muted:#6a6862;--line:#e3e0da;
+--accent:#1f6f8b;--soft:#e8f3f7;--code:#f2f0ec;--codeink:#1b1a18;
+--ok:#1f7a4d;--okbg:#eaf6ef;--warn:#8a4b1f;--warnbg:#fdf1e7;--out:#eef1f4;}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+--bg:#161513;--panel:#1f1e1b;--ink:#ecebe6;--muted:#a19d95;--line:#33302b;
+--accent:#5fb3cc;--soft:#2a211a;--code:#25231f;--codeink:#ecebe6;
+--ok:#6cc79a;--okbg:#17281f;--warn:#e0a570;--warnbg:#2a1f16;--out:#22262b;}}
+:root[data-theme=dark]{--bg:#161513;--panel:#1f1e1b;--ink:#ecebe6;--muted:#a19d95;
+--line:#33302b;--accent:#5fb3cc;--soft:#2a211a;--code:#25231f;--codeink:#ecebe6;
+--ok:#6cc79a;--okbg:#17281f;--warn:#e0a570;--warnbg:#2a1f16;--out:#22262b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:16px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:40px 20px 90px}
+header.top{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:10px}
+h1{font-size:28px;margin:0 0 6px;letter-spacing:-.02em;line-height:1.2}
+.sub{color:var(--muted);margin:0;font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:99px;
+padding:4px 11px;font-size:12px;color:var(--muted)}
+.chip b{color:var(--ink);font-weight:600}
+nav.toc{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);
+padding:10px 0;margin-bottom:26px;z-index:5;display:flex;gap:6px;overflow-x:auto}
+nav.toc a{font-size:12.5px;color:var(--muted);text-decoration:none;white-space:nowrap;
+padding:4px 10px;border-radius:99px;border:1px solid transparent}
+nav.toc a:hover{color:var(--accent);border-color:var(--line)}
+section{background:var(--panel);border:1px solid var(--line);border-radius:13px;
+padding:24px;margin-bottom:20px;scroll-margin-top:60px}
+.num{display:inline-block;background:var(--soft);color:var(--accent);font-size:11.5px;
+font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;
+border-radius:5px;margin-bottom:11px}
+h2{font-size:19.5px;margin:0 0 14px;letter-spacing:-.01em}
+h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+margin:22px 0 8px;font-weight:600}
+ul{margin:0;padding-left:19px}li{margin:5px 0}
+p{margin:0 0 10px}
+.cb{position:relative;margin:10px 0}
+.cb .lbl{display:flex;justify-content:space-between;align-items:center;
+background:var(--out);border:1px solid var(--line);border-bottom:none;
+border-radius:9px 9px 0 0;padding:5px 11px;font-size:11px;color:var(--muted);
+text-transform:uppercase;letter-spacing:.06em}
+.cb pre{margin:0;background:var(--code);color:var(--codeink);border:1px solid var(--line);
+border-radius:0 0 9px 9px;padding:13px;overflow-x:auto;
+font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}
+.cb.out pre{background:var(--out);color:var(--muted)}
+button.cp{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+border-radius:6px;padding:2px 9px;font-size:11px;cursor:pointer;font-family:inherit}
+button.cp:hover{color:var(--accent);border-color:var(--accent)}
+button.cp.done{color:var(--ok);border-color:var(--ok)}
+.note,.warn{border-radius:0 9px 9px 0;padding:12px 15px;margin:14px 0;border-left:3px solid}
+.note{background:var(--okbg);border-color:var(--ok)}
+.warn{background:var(--warnbg);border-color:var(--warn)}
+.note p,.warn p{margin:0}
+.scroll{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:420px}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+code.inl{background:var(--code);padding:1.5px 5px;border-radius:4px;
+font:12.5px ui-monospace,Menlo,monospace;word-break:break-word}
+svg.flow{width:100%;height:auto;display:block;margin:14px 0}
+details{border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin:9px 0;
+background:var(--bg)}
+summary{cursor:pointer;font-weight:600;font-size:14.5px}
+details[open] summary{margin-bottom:9px}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+padding-top:18px;margin-top:30px}
+.toggle{position:fixed;right:14px;bottom:14px;background:var(--panel);
+border:1px solid var(--line);color:var(--muted);border-radius:99px;padding:7px 13px;
+font-size:12px;cursor:pointer;font-family:inherit;z-index:9}
+</style></head><body><div class="wrap">
+<header class="top"><h1>Databricks &times; GitHub &mdash; Plain English Guide</h1>
+<p class="sub">What we built, why it matters, and what it costs. No code needed.</p>
+<div class="chips"><span class="chip">Reading time <b>6 min</b></span>
+<span class="chip">Audience <b>non-engineers</b></span>
+<span class="chip">Status <b>working</b></span></div></header>
+<nav class="toc"><a href="#prob">The problem</a><a href="#fix">The fix</a><a href="#flow">How it flows</a>
+<a href="#safe">Safety rails</a><a href="#cost">Cost</a><a href="#real">What went wrong</a>
+<a href="#terms">Word list</a></nav><section id="prob"><span class="num">Why</span><h2>The problem we solved</h2>
+<p>Databricks is where the data work happens. The code for that work lives in GitHub.</p>
+<p>Moving code from one to the other by hand is slow and risky:</p>
+<ul><li>Someone copies the wrong version</li>
+<li>Someone forgets a step</li>
+<li>Nobody is sure what is running right now</li>
+<li>A broken change reaches production unnoticed</li></ul>
+<div class="note"><p><b>In one line:</b> we made the move automatic, repeatable,
+and checked at every step.</p></div></section><section id="fix"><span class="num">What</span><h2>What we built</h2>
+<p>A pipeline. Think of it as a delivery line with inspection points.</p>
+<ul><li>A developer saves their work to GitHub</li>
+<li>Tests run automatically</li>
+<li>If tests fail, <b>nothing is delivered</b></li>
+<li>If tests pass, the work is installed into Databricks</li></ul>
+<h3>Two separate destinations</h3>
+<div class="scroll"><table>
+<tr><th>Name</th><th>What it is for</th><th>Who it affects</th></tr>
+<tr><td><b>dev</b></td><td>Practice area. Try things safely</td><td>Just the developer</td></tr>
+<tr><td><b>prod</b></td><td>The real thing</td><td>Everyone</td></tr>
+</table></div>
+<p>Getting to <b>prod</b> requires a deliberate act &mdash; a release marker, or a button
+someone chooses to press. It never happens by accident.</p></section><section id="flow"><span class="num">How</span><h2>How it flows</h2><svg class="flow" viewBox="0 0 860 150" xmlns="http://www.w3.org/2000/svg" role="img"
+ aria-label="Flow: developer pushes to GitHub, Actions runs tests, validates and deploys the bundle, Databricks runs the job">
+<defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+<polygon points="0 0, 9 3.5, 0 7" fill="currentColor"/></marker></defs>
+<g fill="none" stroke="currentColor" stroke-width="1.4" opacity=".45" marker-end="url(#a)">
+<line x1="150" y1="62" x2="196" y2="62"/><line x1="346" y1="62" x2="392" y2="62"/>
+<line x1="542" y1="62" x2="588" y2="62"/></g>
+<g font-size="13" font-family="ui-sans-serif,system-ui" text-anchor="middle">
+<rect x="8" y="34" width="142" height="56" rx="9" fill="var(--soft)" stroke="var(--accent)" stroke-width="1.2"/>
+<text x="79" y="58" fill="var(--accent)" font-weight="600">1. You</text>
+<text x="79" y="76" fill="var(--muted)" font-size="11.5">git push</text>
+<rect x="196" y="34" width="150" height="56" rx="9" fill="var(--panel)" stroke="var(--line)"/>
+<text x="271" y="58" fill="var(--ink)" font-weight="600">2. GitHub Actions</text>
+<text x="271" y="76" fill="var(--muted)" font-size="11.5">runs the tests</text>
+<rect x="392" y="34" width="150" height="56" rx="9" fill="var(--panel)" stroke="var(--line)"/>
+<text x="467" y="58" fill="var(--ink)" font-weight="600">3. Bundle deploy</text>
+<text x="467" y="76" fill="var(--muted)" font-size="11.5">sends the job over</text>
+<rect x="588" y="34" width="150" height="56" rx="9" fill="var(--panel)" stroke="var(--line)"/>
+<text x="663" y="58" fill="var(--ink)" font-weight="600">4. Databricks</text>
+<text x="663" y="76" fill="var(--muted)" font-size="11.5">job is ready</text>
+<text x="430" y="122" fill="var(--muted)" font-size="11.5">Running the job is a separate, opt-in step</text>
+</g></svg>
+<h3>Two different things &mdash; worth separating</h3>
+<div class="scroll"><table>
+<tr><th>Action</th><th>Meaning</th><th>Costs money?</th></tr>
+<tr><td><b>Deploy</b></td><td>Install the work so it is ready</td><td>No</td></tr>
+<tr><td><b>Run</b></td><td>Actually do the work</td><td><b>Yes</b></td></tr>
+</table></div>
+<p>We deploy often. We run only when we mean to.</p></section><section id="safe"><span class="num">Safety</span><h2>The safety rails</h2>
+<div class="scroll"><table>
+<tr><th>Rail</th><th>What it prevents</th></tr>
+<tr><td>Tests run first</td><td>Broken code being delivered</td></tr>
+<tr><td>Proposals are tested, never deployed</td><td>Unreviewed work reaching anything real</td></tr>
+<tr><td>dev and prod are separate</td><td>Experiments touching live data</td></tr>
+<tr><td>Passwords stored in a vault</td><td>Secrets sitting in readable files</td></tr>
+<tr><td>A robot account, not a person&rsquo;s</td><td>Everything breaking when someone leaves</td></tr>
+</table></div>
+<div class="note"><p><b>The robot account matters more than it sounds.</b> If the pipeline
+used a person&rsquo;s login, their holiday, password change, or departure would stop
+deliveries. A dedicated non-human account has no such life events.</p></div></section><section id="cost"><span class="num">Money</span><h2>What this costs</h2>
+<ul><li>Storing the code &mdash; free</li>
+<li>Running the tests &mdash; free for this size</li>
+<li>Installing into Databricks &mdash; free</li>
+<li><b>Running the actual job &mdash; this is the part that costs</b></li></ul>
+<h3>A real example from this build</h3>
+<p>One change touched only a settings file. No data logic at all. Yet it started a real
+job on paid machines &mdash; simply because the old setup ran the job on <i>every</i> save.</p>
+<div class="note"><p><b>We changed that.</b> Saving now installs the work but does not run it.
+Running is a deliberate choice. Small sum here; the same pattern on a large pipeline is
+a real bill.</p></div></section><section id="real"><span class="num">Honesty</span><h2>What went wrong along the way</h2>
+<p>Three things, all worth knowing:</p>
+<h3>1. A password saved as blank</h3>
+<ul><li>An automated helper saved the password &mdash; but saved <b>nothing</b></li>
+<li>The system showed the password as existing</li>
+<li>It only failed when the pipeline actually ran</li></ul>
+<p><b>Lesson:</b> a listed password is not a working password. Only a real run proves it.</p>
+<h3>2. One invisible character</h3>
+<ul><li>Second attempt saved the password with an extra invisible line-break</li>
+<li>Everything looked correct</li>
+<li>Login failed anyway</li></ul>
+<p><b>Lesson:</b> the error message blamed &ldquo;missing credentials&rdquo; when the credential was
+present and merely wrong. Misleading errors cost time.</p>
+<h3>3. The right key, the wrong building</h3>
+<ul><li>A robot account was created &mdash; in the wrong Databricks account</li>
+<li>Its credentials were valid, just for somewhere else</li></ul>
+<p><b>Lesson:</b> check which account you are in before trusting a credential.</p></section><section id="terms"><span class="num">Glossary</span><h2>Word list</h2>
+<div class="scroll"><table>
+<tr><th>Term</th><th>Plain meaning</th></tr>
+<tr><td>Repository (repo)</td><td>The folder where code lives, with full history</td></tr>
+<tr><td>Commit</td><td>One saved change, with a note about why</td></tr>
+<tr><td>Push</td><td>Send saved changes to the shared copy</td></tr>
+<tr><td>Tag</td><td>A named marker, e.g. <i>v0.1.0</i> &mdash; used to declare a release</td></tr>
+<tr><td>Pipeline / CI/CD</td><td>The automatic test-and-deliver line</td></tr>
+<tr><td>Bundle</td><td>The work packaged up, ready to install</td></tr>
+<tr><td>Deploy</td><td>Install it so it is ready to use</td></tr>
+<tr><td>Job</td><td>The task Databricks performs</td></tr>
+<tr><td>Serverless</td><td>Machines appear when needed, vanish after. No caretaking</td></tr>
+<tr><td>Secret</td><td>A password kept in a vault, never in the code</td></tr>
+<tr><td>Service principal</td><td>A robot account for software, not a person</td></tr>
+<tr><td>dev / prod</td><td>Practice area / the real thing</td></tr>
+</table></div></section>
+<footer>Everything described here was built and tested for real. The failures above
+are recorded because they are the useful part.</footer>
+</div>
+<button class="toggle" onclick="tg()">◐ theme</button>
+<script>
+document.querySelectorAll('.cb').forEach(function(b){
+  var pre=b.querySelector('pre'), lbl=b.querySelector('.lbl');
+  if(!pre||!lbl||b.classList.contains('out'))return;
+  var btn=document.createElement('button');btn.className='cp';btn.textContent='copy';
+  btn.onclick=function(){
+    navigator.clipboard.writeText(pre.innerText).then(function(){
+      btn.textContent='copied';btn.classList.add('done');
+      setTimeout(function(){btn.textContent='copy';btn.classList.remove('done')},1400);
+    }).catch(function(){btn.textContent='press Cmd+C'});
+  };
+  lbl.appendChild(btn);
+});
+function tg(){var r=document.documentElement;
+  var d=r.getAttribute('data-theme')==='dark'||
+    (!r.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme:dark)').matches);
+  r.setAttribute('data-theme',d?'light':'dark');}
+</script></body></html>
