@@ -1,6 +1,9 @@
 name: databricks-cicd-demo
 
 on:
+  # Allows running the pipeline by hand from the Actions tab, e.g. to retry
+  # after changing a secret without needing a throwaway commit.
+  workflow_dispatch:
   push:
     branches:
       - main
